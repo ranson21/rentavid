@@ -1,0 +1,6 @@
+[submodule "apps/web"]
+	path = apps/web
+	url = git@github.com:ranson21/rentavid-web
+[submodule "services/api"]
+	path = services/api
+	url = git@github.com:ranson21/rentavid-api

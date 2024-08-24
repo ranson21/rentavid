@@ -2,6 +2,24 @@ version: "3"
 volumes:
   pgdata:
 services:
+  web:
+    build: ../../apps/web
+    image: rentavid-web
+    container_name: rentavid-web
+    expose:
+      - 8080
+    ports:
+      - 8080:3000
+  api:
+    build: ../../services/api
+    image: rentavid-api
+    container_name: rentavid-api
+    environment:
+      DB_URL: postgresql://postgres:123456@pagila/postgres
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
   pagila:
     image: postgres:13.2
     container_name: pagila
