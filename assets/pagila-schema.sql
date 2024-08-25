@@ -434,6 +434,8 @@ CREATE TABLE film (
     film_id integer DEFAULT nextval('film_film_id_seq'::regclass) NOT NULL,
     title text NOT NULL,
     description text,
+    backdrop_path text NOT NULL,
+    poster_path text NOT NULL,
     release_year year,
     language_id smallint NOT NULL,
     original_language_id smallint,
