@@ -39,7 +39,7 @@ To set up the project locally, follow these steps:
 
 3. Initialize and update the submodules:
    ```
-   git submodule init --update --recursive
+   git submodule update --init --recursive
    ```
 
 4. Build the dependencies:
