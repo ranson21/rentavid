@@ -8,6 +8,7 @@ services:
     container_name: rentavid-web
     environment:
       API_HOST: http://api:8000
+      API_URL: http://api:8000
       API_PORT: 8000
     expose:
       - 3000
