@@ -29,7 +29,7 @@ To set up the project locally, follow these steps:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/rentavid.git
+   git clone https://github.com/ranson21/rentavid.git
    ```
 
 2. Navigate to the project directory:
@@ -83,4 +83,4 @@ This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-Created by [Abigail Ranson](https://github.com/your-username) with ❤️
+Created by [Abigail Ranson](https://github.com/ranson21) with ❤️
