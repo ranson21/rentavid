@@ -2,9 +2,10 @@ import csv
 import requests
 import time
 import os
+import sys
 
 # TMDb API configuration
-API_KEY = "d15a31974f3a0a2d8aab087ecd8b11f2"
+API_KEY = os.getenv("API_KEY")
 BASE_URL = "https://api.themoviedb.org/3/movie/"
 IMAGE_BASE_URL = "https://image.tmdb.org/t/p/w500"
 
@@ -20,27 +21,9 @@ def fetch_movie_data(movie_id):
         return None
 
 
-def download_image(url, filename):
-    if url:
-        response = requests.get(url)
-        if response.status_code == 200:
-            with open(filename, "wb") as file:
-                file.write(response.content)
-            print(f"Downloaded: {filename}")
-        else:
-            print(f"Error downloading {filename}: {response.status_code}")
-    else:
-        print(f"No URL provided for {filename}")
-
-
 def main():
     input_file = "film.csv"
     output_file = "movie_data.csv"
-    image_folder = "movie_images"
-
-    # Create image folder if it doesn't exist
-    if not os.path.exists(image_folder):
-        os.makedirs(image_folder)
 
     with open(input_file, "r") as csv_file, open(
         output_file, "w", newline=""
@@ -64,36 +47,33 @@ def main():
         csv_writer.writeheader()
 
         for row in csv_reader:
-            movie_id = int(row["film_id"]) + 10000
-            movie_data = fetch_movie_data(movie_id)
+            movie_data = None
+            for i in range(5):  # Try up to 5 times
+                movie_id = int(row["film_id"]) + 10000 + (i * 10)
+                movie_data = fetch_movie_data(movie_id)
+                if movie_data:
+                    break
+                time.sleep(0.25)  # Add a delay to avoid hitting API rate limits
 
             if movie_data:
-                backdrop_path = movie_data.get("backdrop_path")
-                poster_path = movie_data.get("poster_path")
-
-                # Download backdrop image
-                if backdrop_path:
-                    backdrop_url = f"{IMAGE_BASE_URL}{backdrop_path}"
-                    backdrop_filename = os.path.join(
-                        image_folder, f"{movie_id}_backdrop.jpg"
-                    )
-                    download_image(backdrop_url, backdrop_filename)
-
-                # Download poster image
-                if poster_path:
-                    poster_url = f"{IMAGE_BASE_URL}{poster_path}"
-                    poster_filename = os.path.join(
-                        image_folder, f"{movie_id}_poster.jpg"
-                    )
-                    download_image(poster_url, poster_filename)
+                backdrop_path = (
+                    f"{IMAGE_BASE_URL}{movie_data.get('backdrop_path', '')}"
+                    if movie_data.get("backdrop_path")
+                    else ""
+                )
+                poster_path = (
+                    f"{IMAGE_BASE_URL}{movie_data.get('poster_path', '')}"
+                    if movie_data.get("poster_path")
+                    else ""
+                )
 
                 csv_writer.writerow(
                     {
                         "film_id": row["film_id"],
                         "title": row["title"],
                         "description": row["description"],
-                        "backdrop_path": f"{IMAGE_BASE_URL}{backdrop_path}",
-                        "poster_path": f"{IMAGE_BASE_URL}{poster_path}",
+                        "backdrop_path": backdrop_path,
+                        "poster_path": poster_path,
                         "release_year": row["release_year"],
                         "language_id": row["language_id"],
                         "original_language_id": row["original_language_id"],
@@ -105,25 +85,9 @@ def main():
                 )
                 print(f"Processed movie ID: {movie_id}")
             else:
-                csv_writer.writerow(
-                    {
-                        "film_id": row["film_id"],
-                        "title": row["title"],
-                        "description": row["description"],
-                        "backdrop_path": "",
-                        "poster_path": "",
-                        "release_year": row["release_year"],
-                        "language_id": row["language_id"],
-                        "original_language_id": row["original_language_id"],
-                        "rental_duration": row["rental_duration"],
-                        "rental_rate": row["rental_rate"],
-                        "length": row["length"],
-                        "replacement_cost": row["replacement_cost"],
-                    }
-                )
-                print(f"Skipped movie ID: {movie_id}...")
-            # Add a delay to avoid hitting API rate limits
-            time.sleep(0.25)
+                print(f"Failed to fetch data for movie ID: {row['film_id']}")
+                print("Terminating the script due to missing movie data.")
+                sys.exit(1)  # Exit the script with an error code
 
 
 if __name__ == "__main__":
